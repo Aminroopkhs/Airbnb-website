@@ -1,0 +1,31 @@
+<%layout("/layouts/boilerplate.ejs")%>
+    <h2 class="mt-3">Edit your listing</h2>
+    <div class="row mt-3">
+        <div class="col-8 offset-2">
+    <form method="POST" action="/listings/<%=listing._id%>?_method=PUT">
+        <div class="mb-3">
+            <lable for="title" class="form-label">Title</lable>
+            <input class="form-control" type="text" name="listing[title]" value="<%=listing.title%>"> 
+        </div>
+        <div class="mb-3">
+             <lable for="description" class="form-label">description</lable>
+            <textarea class="form-control" name="listing[description]"><%=listing.description%> </textarea>
+        </div>
+        <div class="mb-3">
+            <lable for="image" class="form-label">Image Link</lable>
+            <input value="<%=listing.image.url%>" class="form-control" placeholder="enter the image URL/link" name="listing[image.url]"> 
+        </div>
+        <div class="mb-3">
+            <lable for="price" class="form-label">price</lable>
+            <input value="<%=listing.price%>" class="form-control" type="number" placeholder="enter the price" name="listing[price]">         </div>
+        <div class="mb-3">
+            <lable for="location" class="form-label">location</lable>
+            <input value="<%=listing.location%>"  type="text" class="form-control" placeholder="enter the location" name="listing[location]"> 
+        </div>
+        <div class="mb-3">
+             <lable for="country" class="form-label">country</lable>
+            <input value="<%=listing.country%>" type="text" class="form-control" placeholder="enter the country" name="listing[country]"> 
+        </div>
+        <button class="btn btn-dark add-btn mt-3 mb-3">Edit</button>
+        <!-- <br><br> -->
+    </form> </div></div>
