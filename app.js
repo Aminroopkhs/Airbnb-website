@@ -3,11 +3,12 @@ const app=express();
 let port=8080;
 const path= require("path");
 const Listing= require("./models/listing.js");
+const Review= require("./models/review.js");
 const methodOverride= require("method-override");
 const ejsMate = require("ejs-mate");
 const wrapAsync= require("./utils/wrapasync.js");
 const ExpressError=require("./utils/ExpressError.js");
-const {listingSchema}= require("./schema.js");
+const {listingSchema,reviewSchema}= require("./schema.js");
 // ejs 
 app.engine('ejs',ejsMate);
 app.set("views", path.join(__dirname,"views"));
@@ -37,6 +38,15 @@ const validateListing= (req,res,next)=>{
     }
 }
 
+const validateReview=(req,res,next)=>{
+    let {error}= reviewSchema.validate(req.body)
+    if (error){
+        let errMsg=error.details.map((el)=> el.message).join(",");
+        throw new ExpressError(400,errMsg);
+    } else{
+        next()
+    }
+}
 // get request 
 app.get('/',(req,res)=>{
     res.send("HI i am the home page / page");
@@ -101,6 +111,18 @@ app.delete("/listings/:id",validateListing,wrapAsync(async(req,res)=>{
     res.redirect("/listings");
 }))
 
+// post request for reviews
+app.post("/listings/:id/reviews",validateReview,wrapAsync(async(req,res)=>{
+    let {id}=req.params;
+    id=id.replace(":","")
+    console.log(id);
+    let listing= await Listing.findById(id)
+    let new_review= new Review(req.body.review);
+    listing.reviews.push(new_review)
+    await new_review.save();
+    await listing.save();
+    res.redirect(`/listings/${id}`)
+}))
 
 // show route when clicked it specifically shows a particular villa (read operation)
 app.get("/listings/:id",wrapAsync(async (req,res)=>{
