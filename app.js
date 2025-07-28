@@ -104,9 +104,10 @@ app.put("/listings/:id",validateListing,wrapAsync(async(req,res)=>{
 }))
 
 // delete request /listings/:id
-app.delete("/listings/:id",validateListing,wrapAsync(async(req,res)=>{
+app.delete("/listings/:id",wrapAsync(async(req,res)=>{
     let {id}=req.params;
-    // id=id.replace(":","");
+    id=id.replace(":","");
+    console.log(id)
     const listing= await Listing.findByIdAndDelete(id);
     res.redirect("/listings");
 }))
@@ -116,7 +117,7 @@ app.post("/listings/:id/reviews",validateReview,wrapAsync(async(req,res)=>{
     let {id}=req.params;
     id=id.replace(":","")
     console.log(id);
-    let listing= await Listing.findById(id)
+    let listing= await Listing.findById(id);
     let new_review= new Review(req.body.review);
     listing.reviews.push(new_review)
     await new_review.save();
@@ -128,9 +129,20 @@ app.post("/listings/:id/reviews",validateReview,wrapAsync(async(req,res)=>{
 app.get("/listings/:id",wrapAsync(async (req,res)=>{
     let {id}= req.params;
     // id= id.replace(":","");
-    const listing= await Listing.findById(id);
+    const listing= await Listing.findById(id).populate("reviews");
     res.render("./listings/show.ejs",{listing});
 }))
+
+// deleting a review from the review collection as well as listing review array
+app.delete("/listings/:id/reviews/:review_id",wrapAsync(async(req,res)=>{
+    let {id,review_id}=req.params;
+    console.log(id);
+    console.log(review_id);
+    await Listing.findByIdAndUpdate(id, {$pull:{reviews: review_id}});
+    await Review.findByIdAndDelete(review_id);
+    res.redirect(`/listings/${id}`);
+}));
+
 
 // // error for any other route except the defined ones
 // app.all("*",(req,res,next)=>{
@@ -143,3 +155,4 @@ app.use((err,req,res,next)=>{
     // res.status(status).send(message);
     res.status(status).render("error.ejs",{err})
 })
+
