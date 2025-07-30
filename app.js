@@ -1,6 +1,8 @@
 const express= require('express');
 const app=express();
 let port=8080;
+const session= require("express-session");
+const flash= require("connect-flash");
 const path= require("path");
 // const Listing= require("./models/listing.js");
 // const Review= require("./models/review.js");
@@ -34,10 +36,31 @@ async function main(){
     await mongoose.connect("mongodb://127.0.0.1:27017/wanderlust");
 }
 
-// get request 
+// session options
+const sessionOptions={
+    secret: "mysupersecret",
+    resave: false,
+    saveUninitialized: true,
+    cookie:{
+        expires: Date.now() + 1000* 60 * 60 * 24 * 3,
+        maxAge: 1000* 60 * 60 * 24 * 3,
+        httpOnly: true
+    }
+};
+app.use((session(sessionOptions)));
+app.use(flash());
+
+// get request
 app.get('/',(req,res)=>{
     res.send("HI i am the home page / page");
 })
+app.use((req,res,next)=>{
+    res.locals.success= req.flash("success");
+    res.locals.error= req.flash("error");
+    // console.log(res.locals.success);
+    next();
+})
+ 
 // listening to the port
 app.listen(port,()=>{
     console.log("the server is connected to ",port)
