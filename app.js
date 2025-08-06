@@ -12,10 +12,14 @@ const wrapAsync= require("./utils/wrapasync.js");
 // const ExpressError=require("./utils/ExpressError.js");
 // const {listingSchema,reviewSchema}= require("./schema.js");
 
+// passport
+const passport=require("passport");
+const LocalStrategy=require("passport-local");
+const User= require("./models/user.js");
 // router
 const listingRoute= require("./routes/listing.js");
 const reviewRoute=require("./routes/review.js");
-
+const userRoute=require("./routes/user.js");
 // ejs 
 app.engine('ejs',ejsMate);
 app.set("views", path.join(__dirname,"views"));
@@ -50,6 +54,13 @@ const sessionOptions={
 app.use((session(sessionOptions)));
 app.use(flash());
 
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new LocalStrategy(User.authenticate()))
+
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
 // get request
 app.get('/',(req,res)=>{
     res.send("HI i am the home page / page");
@@ -61,6 +72,16 @@ app.use((req,res,next)=>{
     next();
 })
  
+// app.get("/demouser",async(req,res)=>{
+//     let fakeuser= new User({
+//         email: "student@gmail.com",
+//         username: "delta-student"
+//     });
+//     let registeruser= await User.register(fakeuser,"helloworld");
+//     res.send(registeruser);
+//     // console.log(registeruser)
+// });
+
 // listening to the port
 app.listen(port,()=>{
     console.log("the server is connected to ",port)
@@ -68,7 +89,7 @@ app.listen(port,()=>{
 
 app.use("/listings",listingRoute);
 app.use("/listings/:id/reviews",reviewRoute);
-
+app.use("/",userRoute);
 // // error for any other route except the defined ones
 // app.all("*",(req,res,next)=>{
 //     next(new ExpressError (404, "Page not found!"));

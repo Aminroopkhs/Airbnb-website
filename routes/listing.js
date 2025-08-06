@@ -4,7 +4,7 @@ const Listing= require("../models/listing.js");
 const wrapAsync= require("../utils/wrapasync.js");
 const ExpressError=require("../utils/ExpressError.js");
 const {listingSchema,reviewSchema}= require("../schema.js");
-
+const {isLoggedIn}= require("../middleware.js");
 // converting validation (JOI) into a middlware
 const validateListing= (req,res,next)=>{
     let {error}= listingSchema.validate(req.body);
@@ -24,7 +24,13 @@ router.get("/",wrapAsync(async(req,res)=>{
     }))
 // new route--> get request /listings/new --> returns a form to create new listing 
 // create route---> post request /listings/new or /listings---> saves the newly added listing to the databse
-router.get("/new",(req,res)=>{
+router.get("/new",isLoggedIn,(req,res)=>{
+    console.log(req.user)
+    // if(!req.isAuthenticated()){
+    //     req.flash("error","you must be loggedIn to create Listing")
+    //     return res.redirect("/login")
+    // } written in the middleware.js file
+
     res.render("./listings/new.ejs")
 })
 
@@ -42,7 +48,7 @@ router.get("/:id",wrapAsync(async (req,res)=>{
 }))
 
 //  create route
-router.post("/",validateListing, wrapAsync(async(req,res,next)=>{
+router.post("/",isLoggedIn,validateListing, wrapAsync(async(req,res,next)=>{
     // let {title,description,image,price,country,location}= req.body; one of the ways to print
     // let listing= req.body.listing;
     // let result= listingSchema.validate(req.body);
@@ -62,7 +68,7 @@ router.post("/",validateListing, wrapAsync(async(req,res,next)=>{
 // edit and update route
 // get request /listings/:id/edit --> edit form rendering --> submit
 //put request /listings/:id
-router.get("/:id/edit",wrapAsync(async(req,res)=>{
+router.get("/:id/edit",isLoggedIn,wrapAsync(async(req,res)=>{
     let {id}= req.params;
     // id= id.replace(":","");
     const listing= await Listing.findById(id);
@@ -74,7 +80,7 @@ router.get("/:id/edit",wrapAsync(async(req,res)=>{
 }))
 
 // update route!!!
-router.put("/:id",validateListing,wrapAsync(async(req,res)=>{
+router.put("/:id",isLoggedIn,validateListing,wrapAsync(async(req,res)=>{
     // if (!req.bosy.listing){
     //         throw new ExpressError(400,"Send Valid data for listing");
     //     };
@@ -86,7 +92,7 @@ router.put("/:id",validateListing,wrapAsync(async(req,res)=>{
 }))
 
 // delete request /listings/:id
-router.delete("/:id",wrapAsync(async(req,res)=>{
+router.delete("/:id",isLoggedIn,wrapAsync(async(req,res)=>{
     let {id}=req.params;
     id=id.replace(":","");
     console.log(id)
