@@ -6,24 +6,26 @@
                 <h3 class="mb-3 mt-4"><%= listing.title %></h3>
                     <img src="<%=listing.image.url%>" class="card-img-top show-img mb-3" alt="listing_img">
                     <div class="card-body">
-                        <p class="card-text mb-3">
-                        <!-- <b>  listing.title %> </b> <br> -->
-                        <%= listing.description %> <br>
-                        &#8377;<%= listing.price.toLocaleString("en-IN") %><br>
-                        <%= listing.location %><br>
-                        <%= listing.country %>
-                        </p>
+                        <p class="card-text mt-3 mb-3"><i> Owned by <%=listing.owner.username%></i> </p>
+                        <p class="card-text mb-3"> <%= listing.description %> </p>
+                        <p class="card-text mb-3">&#8377;<%= listing.price.toLocaleString("en-IN") %></p>
+                        <p class="card-text mb-3"><%= listing.location %></p>
+                        <p class="card-text mb-3"><%= listing.country %> </p>
+                        
                     </div>
-                <div class="btns">
+                <% if (currUser && currUser._id.equals(listing.owner._id)){%>
+                 <div class="btns">
                     <a class="btn btn-dark col-2 offset-1 edit-btn ms-auto mb-3" href="/listings/<%=listing._id%>/edit">Edit</a>
                     <form method="POST" action="/listings/:<%=listing._id%>?_method=DELETE">
                     <button class="btn btn-dark offset-5 col-3 ms-auto">Delete</button></form> 
-                </div>
+                </div> 
+                <%}%> 
             </div>
         </div>
         <div class="col-8 offset-3 mt-2 mb-3">
             <hr>
             <h4>Leave a Review</h4>
+            <% if (currUser) {%>
             <form  action="/listings/:<%=listing._id%>/reviews" method="POST" novalidate class="needs-validation">
                 <div class="mb-3 mt-4">
                     <label for="rating" class="form-label">Rating</label>
@@ -39,13 +41,14 @@
                     <button class="btn btn-outline-dark ">Submit</button>
                 </div>
             </form>
+            <%}%>
             <hr>
             <h4>All Reviews</h4>
             <div class="row ">
             <% for (review of listing.reviews){%>
                     <div class="card col-5 ms-3 mb-4">
                         <div class="card-body">
-                            <h5 class="card-title">Anonymous</h5>
+                            <h5 class="card-title">@<%=review.author.username%></h5>
                             <p class="card-text"><%=review.comment%></p>
                             <p class="card-text"><%=review.rating%> stars</p>
                         </div>

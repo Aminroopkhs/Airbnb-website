@@ -4,7 +4,8 @@ const Listing= require("../models/listing.js");
 const wrapAsync= require("../utils/wrapasync.js");
 const ExpressError=require("../utils/ExpressError.js");
 const {listingSchema,reviewSchema}= require("../schema.js");
-const {isLoggedIn}= require("../middleware.js");
+const {isLoggedIn,isOwner}= require("../middleware.js");
+// const {isOwner}=require("")
 // converting validation (JOI) into a middlware
 const validateListing= (req,res,next)=>{
     let {error}= listingSchema.validate(req.body);
@@ -38,7 +39,7 @@ router.get("/new",isLoggedIn,(req,res)=>{
 router.get("/:id",wrapAsync(async (req,res)=>{
     let {id}= req.params;
     // id= id.replace(":","");
-    const listing= await Listing.findById(id).populate("reviews");
+    const listing= await Listing.findById(id).populate({path: "reviews", populate:{path:"author"}}).populate("owner");
     // console.log(listing)
     if (!listing){
         req.flash("error","Listing Does not exist");
@@ -60,6 +61,7 @@ router.post("/",isLoggedIn,validateListing, wrapAsync(async(req,res,next)=>{
         // if (!req.body.listing){
         //     throw new ExpressError(400,"Send Valid data for listing");
         // }
+    new_listing.owner= req.user._id;
     await new_listing.save();
     req.flash("success","new listing created");
     res.redirect("/listings");
@@ -68,7 +70,7 @@ router.post("/",isLoggedIn,validateListing, wrapAsync(async(req,res,next)=>{
 // edit and update route
 // get request /listings/:id/edit --> edit form rendering --> submit
 //put request /listings/:id
-router.get("/:id/edit",isLoggedIn,wrapAsync(async(req,res)=>{
+router.get("/:id/edit",isLoggedIn,isOwner,wrapAsync(async(req,res)=>{
     let {id}= req.params;
     // id= id.replace(":","");
     const listing= await Listing.findById(id);
@@ -80,22 +82,27 @@ router.get("/:id/edit",isLoggedIn,wrapAsync(async(req,res)=>{
 }))
 
 // update route!!!
-router.put("/:id",isLoggedIn,validateListing,wrapAsync(async(req,res)=>{
+router.put("/:id",isLoggedIn,isOwner,validateListing,wrapAsync(async(req,res)=>{
     // if (!req.bosy.listing){
     //         throw new ExpressError(400,"Send Valid data for listing");
     //     };
     let {id}= req.params;
-    // id= id.replace(":","");
+    // // id= id.replace(":","");
+    // let listing= awaitListing.findById(id);
+    // if (!listing.owner._id.equals(res.locals.currUser._id)){
+    //     req.flash("error","You have permission to edit");
+    //     return res.redirect(`/listings/${id}`)
+    // }
     const listing= await Listing.findByIdAndUpdate(id,{...req.body.listing});
     req.flash("success","listing updated");
     res.redirect("/listings");
 }))
 
 // delete request /listings/:id
-router.delete("/:id",isLoggedIn,wrapAsync(async(req,res)=>{
+router.delete("/:id",isLoggedIn,isOwner,wrapAsync(async(req,res)=>{
     let {id}=req.params;
     id=id.replace(":","");
-    console.log(id)
+    console.log(id);
     const listing= await Listing.findByIdAndDelete(id);
     req.flash("success","listing deleted");
     res.redirect("/listings");
