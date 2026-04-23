@@ -18,28 +18,30 @@ const validateListing= (req,res,next)=>{
     }
 }
 
-// lists all the villas and other things on the page
-// index route
-router.get("/",wrapAsync(listingcontroller.index));
+router
+    .route("/")
+    // lists all the villas and other things on the page
+    // index route
+    .get(wrapAsync(listingcontroller.index))
+    //  create route
+    .post(isLoggedIn,validateListing, wrapAsync(listingcontroller.newlisting));
+
 // new route--> get request /listings/new --> returns a form to create new listing 
 // create route---> post request /listings/new or /listings---> saves the newly added listing to the databse
 router.get("/new",isLoggedIn,listingcontroller.newroute);
 
-// show route when clicked it specifically shows a particular villa (read operation)
-router.get("/:id",wrapAsync(listingcontroller.specificvilla));
-
-//  create route
-router.post("/",isLoggedIn,validateListing, wrapAsync(listingcontroller.newlisting));
+router
+    .route("/:id")
+    // show route when clicked it specifically shows a particular villa (read operation)
+    .get(wrapAsync(listingcontroller.specificvilla))
+    // update route!!!
+    .put(isLoggedIn,isOwner,validateListing,wrapAsync(listingcontroller.updateroute))
+    // delete request /listings/:id
+    .delete(isLoggedIn,isOwner,wrapAsync(listingcontroller.deleteroute));
 
 // edit and update route
 // get request /listings/:id/edit --> edit form rendering --> submit
 //put request /listings/:id
 router.get("/:id/edit",isLoggedIn,isOwner,wrapAsync(listingcontroller.editroute));
-
-// update route!!!
-router.put("/:id",isLoggedIn,isOwner,validateListing,wrapAsync(listingcontroller.update))
-
-// delete request /listings/:id
-router.delete("/:id",isLoggedIn,isOwner,wrapAsync(listingcontroller.deleteroute))
 
 module.exports=router;
