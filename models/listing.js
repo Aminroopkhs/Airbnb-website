@@ -4,10 +4,7 @@ const Review=require("./review.js");
 const listingSchema= new Schema({
     title: {type: String, required:true},
     description: String,
-    image:{ filename: String,
-    url: {type: String, default:"https://unsplash.com/photos/tree-branches-reach-towards-a-clear-blue-sky-oajlEpl_m_w",
-        set: (v)=> v=== "" ? "https://unsplash.com/photos/tree-branches-reach-towards-a-clear-blue-sky-oajlEpl_m_w" : v,
-    }},
+    image:{ url: String, filename: String},
     price:Number,
     location:String,
     country:String,

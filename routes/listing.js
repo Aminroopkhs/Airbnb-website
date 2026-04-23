@@ -27,7 +27,7 @@ router
     // index route
     .get(wrapAsync(listingcontroller.index))
     //  create route
-    .post(isLoggedIn,validateListing,upload.single('listing[image]'), wrapAsync(listingcontroller.newlisting));
+    .post(isLoggedIn,upload.single('listing[image]'),validateListing, wrapAsync(listingcontroller.newlisting));
     // .post(upload.single('listing[image]'),(req,res)=>{
     //     res.send(req.file);
     // });
@@ -40,7 +40,7 @@ router
     // show route when clicked it specifically shows a particular villa (read operation)
     .get(wrapAsync(listingcontroller.specificvilla))
     // update route!!!
-    .put(isLoggedIn,isOwner,validateListing,wrapAsync(listingcontroller.updateroute))
+    .put(isLoggedIn,isOwner,upload.single('listing[image]'),validateListing,wrapAsync(listingcontroller.updateroute))
     // delete request /listings/:id
     .delete(isLoggedIn,isOwner,wrapAsync(listingcontroller.deleteroute));
 

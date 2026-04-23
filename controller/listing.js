@@ -34,12 +34,15 @@ module.exports.newlisting=async(req,res,next)=>{
     // if (result.error){
     //     throw new ExpressError(400, result.error);
     // }
+    let url= req.file.path;
+    let filename= req.file.filename;
     const new_listing= new Listing(req.body.listing);
         // checking only the entire listing and not the individual fields.
         // if (!req.body.listing){
         //     throw new ExpressError(400,"Send Valid data for listing");
         // }
     new_listing.owner= req.user._id;
+    new_listing.image= {url: url, filename: filename};
     await new_listing.save();
     req.flash("success","new listing created");
     res.redirect("/listings");
@@ -53,7 +56,9 @@ module.exports.editroute=async(req,res)=>{
         req.flash("error","Listing Does not exist");
         return res.redirect("/listings");
     }
-    res.render("./listings/edit.ejs",{listing});
+    let originalImageUrl = listing.image.url;
+    originalImageUrl= originalImageUrl.replace("/upload","/upload/h_300,w_250");
+    res.render("./listings/edit.ejs",{listing,originalImageUrl});
 };
 
 module.exports.updateroute=async(req,res)=>{
@@ -68,6 +73,12 @@ module.exports.updateroute=async(req,res)=>{
     //     return res.redirect(`/listings/${id}`)
     // }
     const listing= await Listing.findByIdAndUpdate(id,{...req.body.listing});
+    if (typeof req.file !== "undefined") {
+        let url= req.file.path;
+        let filename= req.file.filename;
+        listing.image= {url: url, filename: filename};
+        await listing.save();
+    }
     req.flash("success","listing updated");
     res.redirect("/listings");
 };
