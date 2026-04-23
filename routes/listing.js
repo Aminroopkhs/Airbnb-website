@@ -5,7 +5,10 @@ const wrapAsync= require("../utils/wrapasync.js");
 const ExpressError=require("../utils/ExpressError.js");
 const {listingSchema,reviewSchema}= require("../schema.js");
 const {isLoggedIn,isOwner}= require("../middleware.js");
-const listingcontroller= require("../controller/listing.js")
+const listingcontroller= require("../controller/listing.js");
+const multer  = require('multer');
+const {storage} = require("../cloudConfig.js");
+const upload = multer({ storage });
 // const {isOwner}=require("")
 // converting validation (JOI) into a middlware
 const validateListing= (req,res,next)=>{
@@ -24,8 +27,10 @@ router
     // index route
     .get(wrapAsync(listingcontroller.index))
     //  create route
-    .post(isLoggedIn,validateListing, wrapAsync(listingcontroller.newlisting));
-
+    .post(isLoggedIn,validateListing,upload.single('listing[image]'), wrapAsync(listingcontroller.newlisting));
+    // .post(upload.single('listing[image]'),(req,res)=>{
+    //     res.send(req.file);
+    // });
 // new route--> get request /listings/new --> returns a form to create new listing 
 // create route---> post request /listings/new or /listings---> saves the newly added listing to the databse
 router.get("/new",isLoggedIn,listingcontroller.newroute);
