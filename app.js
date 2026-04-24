@@ -5,6 +5,7 @@ const express= require('express');
 const app=express();
 let port=8080;
 const session= require("express-session");
+const MongoStore = require("connect-mongo").default;
 const flash= require("connect-flash");
 const path= require("path");
 // const Listing= require("./models/listing.js");
@@ -31,6 +32,8 @@ app.use(express.urlencoded({extended:true}));
 app.use(express.static(path.join(__dirname,"/public")));
 app.use(methodOverride("_method"));
 
+const dBUrl= process.env.ATLASDB_URL;
+
 // mongodb
 const mongoose= require('mongoose');
 main().then(()=>{
@@ -40,11 +43,22 @@ main().then(()=>{
 });
 
 async function main(){
-    await mongoose.connect("mongodb://127.0.0.1:27017/wanderlust");
-}
+    await mongoose.connect(dBUrl);
+};
 
+const store = MongoStore.create({
+    mongoUrl: dBUrl,
+    crypto:{
+        secret: "mysupersecret",
+    },
+    touchAfter: 24*60*60,
+});
+store.on("error", (err)=>{
+    console.log("ERROR in mongo session store!",err);
+})
 // session options
 const sessionOptions={
+    store,
     secret: "mysupersecret",
     resave: false,
     saveUninitialized: true,
@@ -54,6 +68,7 @@ const sessionOptions={
         httpOnly: true
     }
 };
+
 app.use((session(sessionOptions)));
 app.use(flash());
 
