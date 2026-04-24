@@ -65,9 +65,9 @@ passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
 // get request
-app.get('/',(req,res)=>{
-    res.send("HI i am the home page / page");
-})
+// app.get('/',(req,res)=>{
+//     res.send("HI i am the home page / page");
+// })
 app.use((req,res,next)=>{
     res.locals.success= req.flash("success");
     res.locals.error= req.flash("error");
