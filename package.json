@@ -1,4 +1,7 @@
 {
+  "engines":{
+    "node": "23.1.0"
+  },
   "name": "airbnb-website",
   "version": "1.0.0",
   "description": "",
